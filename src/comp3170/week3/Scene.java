@@ -28,6 +28,9 @@ public class Scene {
 	private int indexBuffer;
 	private Vector3f[] colours;
 	private int colourBuffer;
+	private float theta = 0; // Angle in radians
+	private float speed = 1.0f; // Speed of rotation (adjustable)
+	private float radius = 0.5f; // Radius of circular path
 
 	private Shader shader;
 
@@ -80,20 +83,76 @@ public class Scene {
 
 	}
 
-	public void draw() {
-		
-		shader.enable();
-		// set the attributes
-		shader.setAttribute("a_position", vertexBuffer);
-		shader.setAttribute("a_colour", colourBuffer);
+//	public void draw() {
+//	    shader.enable();
+//	    
+//	    // Set vertex attributes
+//	    shader.setAttribute("a_position", vertexBuffer);
+//	    shader.setAttribute("a_colour", colourBuffer);
+//	    
+//	    // Create a model matrix and set it as a uniform
+//	    Matrix4f modelMatrix = new Matrix4f();
+//	    Matrix4f temp = new Matrix4f();
+//	    
+//	    // Image at
+////	    modelMatrix.identity(); 
+//	    
+//	    // Image b)
+////	    rotationMatrix((float)Math.toRadians(90), modelMatrix);
+//	    
+//	    // Image c)
+////	    modelMatrix.mul(translationMatrix(0.5f, -0.5f, temp));
+////	    modelMatrix.mul(scaleMatrix(0.5f, 0.5f, temp));    
+//	    
+//	    // Image d)
+////	    modelMatrix.mul(translationMatrix(-0.65f, 0.65f, temp));
+////	    modelMatrix.mul(rotationMatrix((float)Math.toRadians(-45), temp));
+////	    modelMatrix.mul(scaleMatrix(0.5f, 0.5f, temp));
+//
+//	   
+//	  
+//	    // Example: Apply desired transformation (replace with specific cases below)
+//	    // rotationMatrix((float)Math.toRadians(90), modelMatrix);
+//	    // scaleMatrix(0.5f, 0.5f, modelMatrix);
+//	    // translationMatrix(0.5f, -0.5f, modelMatrix);
+//	    
+//	    shader.setUniform("u_modelMatrix", modelMatrix);
+//	    
+//	    // Draw using index buffer
+//	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+//	    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//	    glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
+//	}
 
-		// draw using index buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
+	public void draw(float deltaTime) {
+	    shader.enable();
 
+	    // Set vertex attributes
+	    shader.setAttribute("a_position", vertexBuffer);
+	    shader.setAttribute("a_colour", colourBuffer);
+
+	    // Update angle based on time
+	    theta += speed * deltaTime; // Counterclockwise motion
+
+	    // Calculate circular position
+	    float x = radius * (float) Math.cos(theta);
+	    float y = radius * (float) Math.sin(theta);
+
+	    // Create model matrix
+	    Matrix4f modelMatrix = new Matrix4f();
+	    translationMatrix(x, y, modelMatrix); // Move along circular path
+	    rotationMatrix(theta, modelMatrix); // Rotate to match direction
+
+	    // Pass model matrix to shader
+	    shader.setUniform("u_modelMatrix", modelMatrix);
+
+	    // Draw using index buffer
+	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	    glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
 	}
+
+
 
 	/**
 	 * Set the destination matrix to a translation matrix. Note the destination
@@ -135,6 +194,21 @@ public class Scene {
 	public static Matrix4f rotationMatrix(float angle, Matrix4f dest) {
 
 		// TODO: Your code here
+		dest.identity();
+		
+	    // Rotation matrix:
+	    // R = [ cosθ  -sinθ  0  0 ]
+	    //     [ sinθ   cosθ  0  0 ]
+	    //     [  0      0    1  0 ]
+	    //     [  0      0    0  1 ]
+		
+		float cos = (float) Math.cos(angle);
+		float sin = (float) Math.sin(angle);
+		
+		dest.m00(cos);
+		dest.m01(-sin);
+		dest.m10(sin);
+		dest.m11(cos);
 
 		return dest;
 	}
@@ -152,8 +226,20 @@ public class Scene {
 	public static Matrix4f scaleMatrix(float sx, float sy, Matrix4f dest) {
 
 		// TODO: Your code here
-
+		dest.identity();
+		
+	    // Scaling matrix:
+	    // S = [ sx  0  0  0 ]
+	    //     [  0 sy  0  0 ]
+	    //     [  0  0  1  0 ]
+	    //     [  0  0  0  1 ]
+		
+		dest.m00(sx);
+		dest.m11(sy);
+		
 		return dest;
 	}
+	
+	
 
 }
