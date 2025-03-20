@@ -14,67 +14,67 @@ import comp3170.Window;
 
 public class Week3 implements IWindowListener {
 
-	private Window window;
-	private Shader shader;
-	
-	final private File DIRECTORY = new File("src/comp3170/week3"); 
-	
-	private int width = 800;
-	private int height = 800;
-	private Scene scene;
-	
-	public Week3() throws OpenGLException  {
-		
-		// create window with title, size, and a listener (this)
-		window = new Window("Week 3 prac", width, height, this);
-		
-		// sets the window as resizable
-		window.setResizable(true);
-		// start running the window
-		window.run();
-	}
-	
-	@Override
-	public void init() {
-		
-		new ShaderLibrary(DIRECTORY);
-		// set the background colour to white
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);	
-		
-		// create the scene
-		scene = new Scene();
-		
-	}
+    private Window window;
+    private Shader shader;
 
+    final private File DIRECTORY = new File("src/comp3170/week3"); 
 
-	@Override
-	public void draw() {
+    private int width = 800;
+    private int height = 800;
+    private Scene scene;
 
-        // clear the colour buffer
-		glClear(GL_COLOR_BUFFER_BIT);	
-		
-		scene.draw(height);
-	    
-	}
+    private long lastFrameTime;  // Stores the previous frame time
+    private float deltaTime;      // Time elapsed between frames
 
-	@Override
-	public void resize(int width, int height) {
-		this.width = width;
-		this.height = height;
-		glViewport(0,0,width,height);
-		
-	}
-	
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
-		
-	}
+    public Week3() throws OpenGLException {
+        // Create window with title, size, and a listener (this)
+        window = new Window("Week 3 prac", width, height, this);
 
-	public static void main(String[] args) throws IOException, OpenGLException{
-		new Week3();
-	}
+        // Set the window as resizable
+        window.setResizable(true);
+        
+        // Initialize time tracking
+        lastFrameTime = System.nanoTime();
 
-	
-	
+        // Start running the window
+        window.run();
+    }
+
+    @Override
+    public void init() {
+        new ShaderLibrary(DIRECTORY);
+        // Set the background colour to white
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);    
+
+        // Create the scene
+        scene = new Scene();
+    }
+
+    @Override
+    public void draw() {
+        // Clear the colour buffer
+        glClear(GL_COLOR_BUFFER_BIT);    
+
+        long currentTime = System.nanoTime();
+        deltaTime = (currentTime - lastFrameTime) / 1_000_000_000.0f;
+        lastFrameTime = currentTime;
+
+        scene.draw(deltaTime);
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        this.width = width;
+        this.height = height;
+        glViewport(0, 0, width, height);
+    }
+
+    @Override
+    public void close() {
+        // Nothing needed here for now
+    }
+
+    public static void main(String[] args) throws IOException, OpenGLException {
+        new Week3();
+    }
 }

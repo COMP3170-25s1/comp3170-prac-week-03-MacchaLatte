@@ -131,19 +131,23 @@ public class Scene {
 	    shader.setAttribute("a_position", vertexBuffer);
 	    shader.setAttribute("a_colour", colourBuffer);
 
-	    // Update angle based on time
-	    theta += speed * deltaTime; // Counterclockwise motion
+	    // Update angle for counterclockwise motion
+	    theta -= speed * deltaTime;
 
-	    // Calculate circular position
+	    // Compute new position for circular motion
 	    float x = radius * (float) Math.cos(theta);
-	    float y = radius * (float) Math.sin(theta);
+	    float y = -radius * (float) Math.sin(theta);
 
-	    // Create model matrix
+	    // Create model matrix (apply transformations in correct order)
 	    Matrix4f modelMatrix = new Matrix4f();
-	    translationMatrix(x, y, modelMatrix); // Move along circular path
-	    rotationMatrix(theta, modelMatrix); // Rotate to match direction
+	    Matrix4f temp = new Matrix4f();
 
-	    // Pass model matrix to shader
+	    modelMatrix.identity();                           
+	    modelMatrix.mul(translationMatrix(x, y, temp)); 
+	    modelMatrix.mul(rotationMatrix(theta, temp)); 
+	    modelMatrix.mul(scaleMatrix(0.2f, 0.2f, temp));
+
+	    // Pass the model matrix to the shader
 	    shader.setUniform("u_modelMatrix", modelMatrix);
 
 	    // Draw using index buffer
